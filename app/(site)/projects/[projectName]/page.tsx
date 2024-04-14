@@ -145,7 +145,7 @@ export default function SingleProjectPage() {
           })
           setToasted(true)
       }
-    }, [toast, toasted])
+    }, [toast, toasted, projectName])
 
 
     const {theme} = useTheme()
