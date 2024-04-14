@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String @db.ObjectId
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.String
+  access_token       String?  
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.String
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id  String  @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id  String  @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+
+  pinnedNodesIds  String[]   @db.ObjectId
+  pinnedNodes Node[] @relation(fields: [projectsIds], references: [id])
+
+  projectsIds String[]   @db.ObjectId
+  projects  Project[] @relation(fields: [projectsIds], references: [id])
+
+  sentMessages Message[]   
+}
+
+model VerificationToken {
+  id  String  @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Project {
+  id  String  @id @default(auto()) @map("_id") @db.ObjectId
+  name String @unique
+  status String 
+  description String
+
+  ownerId String @db.ObjectId
+
+  usersIds String[] @db.ObjectId
+  user   User[]   @relation(fields: [usersIds], references: [id])
+
+  nodes Node[]
+
+  messages Message[]
+}
+
+model Node {
+  id  String  @id @default(auto()) @map("_id") @db.ObjectId
+  name String @unique
+  type String 
+  xPos Int 
+  yPos Int 
+  title String 
+  content String
+
+  project   Project   @relation(fields: [projectId], references: [id], onDelete : Cascade)
+  projectId String @db.ObjectId
+
+  pinners   User[]   @relation(fields: [pinnersIds], references: [id])
+  pinnersIds String[] @db.ObjectId
+}
+
+model Message {
+  id                   String       @id @default(auto()) @map("_id") @db.ObjectId
+  content                String
+
+  project  Project @relation(fields: [projectId], references: [id], onDelete : Cascade)
+  projectId String       @db.ObjectId
+
+  sender               User         @relation(fields: [senderId], references: [id])
+  senderId             String       @db.ObjectId
+}
