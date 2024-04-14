@@ -16,5 +16,8 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher : [ '/dashboard', '/createNew', '/calendar', '/userManual', '/projects/:path*'],
+    matcher : [ 'https://flow-amber.vercel.app/dashboard', 
+    'https://flow-amber.vercel.app/createNew', 
+    '/projects/:path*',
+  ],
 }
