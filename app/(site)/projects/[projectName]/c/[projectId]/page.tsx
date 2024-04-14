@@ -1,7 +1,5 @@
 'use client'
 
-import { ScrollArea } from "@/components/ui/scroll-area"
-
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -9,6 +7,7 @@ import { getMessages } from "@/actions/getMessages";
 import createMessage from "@/actions/createMessage";
 
 import { pusherClient } from "@/lib/pusher";
+import Link from "next/link";
 
 export default function ProjectChatsPage() {
     const pathname = usePathname();
@@ -64,6 +63,7 @@ export default function ProjectChatsPage() {
 
     return (
         <div className="flex flex-col px-[18vw] py-14 w-screen h-screen">
+            <Link href={`/projects/${projectName}`} className="underline">Go back</Link>
             <div className="h-full w-full rounded-md border p-10 overflow-y-auto">
                 {messages && (
                     messages.map((message : any) => (
@@ -78,7 +78,9 @@ export default function ProjectChatsPage() {
                 )}
             </div>
             <form className="w-full flex" action={async (formData : FormData) => {
-                await createMessage(projectId, formData)
+                await createMessage(projectId, formData).then((res) => {
+                    setMessages([...messages, res])
+                })
             }}>
                 <input id='content' name="content" placeholder="Type your message here..." className="basis-[90%] bg-secondary-foreground text-secondary font-semibold rounded-b-xl resize-none p-5 focus:outline-none" />
                 <button type="submit" className="w-[10rem] bg-blue-700 text-sm py-2 text-white font-bold rounded-b-xl hover:opacity-70">

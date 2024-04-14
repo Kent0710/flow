@@ -23,24 +23,16 @@ export default async function createMessage(projectId : string, formData : FormD
                 senderId : sender.id
             },
             include : {
-                sender : true
+                sender : true,
+                project : {
+                    include : {
+                        user : true
+                    }
+                }
             }
         });
 
-        if (!message) return null;
-
-        const project = await prisma.project.findUnique({
-            where : {
-                id : projectId
-            },
-            include : {
-                user : true,
-            }
-        });
-
-        if (!project) return null;
-
-        const projectMembers = project.user.map(member => member.name) || [];
+        const projectMembers = message.project.user.map(member => member.name) || [];
         for (let i = 0; i < projectMembers.length; i++) {
             await pusherServer.trigger(`new-message-${projectMembers[i]}`, 'new-message', {
                 newMessage : message
